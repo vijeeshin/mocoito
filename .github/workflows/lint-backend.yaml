@@ -1,0 +1,61 @@
+name: Lint and test - Backend
+
+on: pull_request
+
+concurrency:
+  group: lint-be-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  run-linters:
+    name: Lint and Test (Backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: dorny/paths-filter@v2.11.1
+        id: filter
+        with:
+          list-files: shell
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            backend:
+              - 'backend/**/*.ts'
+              - 'backend/**/*.json'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        if: ${{ steps.filter.outputs.backend == 'true' }}
+        with:
+          node-version: 14
+          cache-dependency-path: '**/yarn.lock'
+          cache: 'yarn'
+
+      - name: Install dependencies - backend
+        run: yarn --pure-lockfile
+        if: ${{ steps.filter.outputs.backend == 'true' }}
+        working-directory: ./backend
+
+      - name: Update schema - backend
+        run: yarn update-schema
+        if: ${{ steps.filter.outputs.backend == 'true' }}
+        working-directory: ./backend
+
+      - name: Lint - backend
+        run: yarn run lint
+        if: ${{ steps.filter.outputs.backend == 'true' }}
+        working-directory: ./backend
+
+      - name: Commit code changes if any
+        uses: EndBug/add-and-commit@v7
+        if: ${{ steps.filter.outputs.backend == 'true' }}
+        with:
+          author_name: github-actions-gm
+          author_email: bot+github-actions-gm@users.noreply.github.com
+          message: 'Fix code style issues with eslint & prettier (backend)'
+          push: '--set-upstream origin'

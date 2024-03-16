@@ -1,0 +1,30 @@
+FROM node:18 as base
+WORKDIR /app
+COPY .yarnrc ./
+COPY yarn.lock ./
+COPY tsconfig.json ./
+COPY build/packages ./packages
+COPY services/api-service/package.json ./
+RUN yarn install --frozen-lockfile
+
+FROM node:18 as container
+WORKDIR /app
+COPY --from=base /app ./
+COPY .eslintrc.json ./
+COPY .gitignore ./
+COPY .prettierrc ./
+COPY .env.dev ./.env.container
+COPY packages ./packages
+COPY build/packages ./packages
+COPY services/api-service/.firebaserc ./
+COPY services/api-service/firebase.json ./
+COPY services/api-service/firebase-service-account.json ./
+COPY services/api-service/src ./src
+ENV GOOGLE_APPLICATION_CREDENTIALS /app/firebase-service-account.json
+RUN yarn build
+EXPOSE 4536
+ENTRYPOINT yarn build --watch & \
+  npx firebase-tools serve \
+  --only hosting,functions  \
+  --host 0.0.0.0 \
+  --port 4536

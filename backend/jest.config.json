@@ -1,0 +1,25 @@
+{
+  "testPathIgnorePatterns": ["/node_modules/", "/build/"],
+  "modulePathIgnorePatterns": [".*/build/"],
+  "testEnvironment": "node",
+  "collectCoverage": false,
+  "transform": {
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        "testPathIgnorePatterns": ["/node_modules/", "/build/"],
+        "isolatedModules": true,
+        "tsconfig": "./tsconfig.json"
+      }
+    ]
+  },
+  "collectCoverageFrom": [
+    "**/*.{ts,tsx}",
+    "!**/build/**",
+    "!**/coverage/**",
+    "!**/node_modules/**",
+    "!**/src/decorators/**",
+    "!**/src/error/**",
+    "!**/test/**"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "cSpell.words": ["clifer", "FILEDIGEST", "mocoito", "skaffold", "tsyringe"],
+  "saveAndRun": {
+    "commands": [
+      {
+        "match": ".hg.ts",
+        "cmd": "hypergraph save ${file}",
+        "useShortcut": false,
+        "silent": true
+      }
+    ]
+  }
+}

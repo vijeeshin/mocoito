@@ -1,0 +1,26 @@
+{
+  "functions": [
+    {
+      "source": ".",
+      "runtime": "nodejs18",
+      "codebase": "default",
+      "maxInstances": 1,
+      "region": "asia-south1",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"]
+    }
+  ],
+  "hosting": {
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "region": "asia-south1",
+    "rewrites": [
+      {
+        "source": "/graphql",
+        "function": "graphql"
+      }
+    ]
+  },
+  "emulators": {
+    "functions": true,
+    "hosting": true
+  }
+}

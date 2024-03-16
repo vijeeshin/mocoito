@@ -1,0 +1,57 @@
+name: Lint and test - Frontend
+
+on: pull_request
+
+concurrency:
+  group: lint-fe-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  run-linters:
+    name: Lint and Test (Frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: dorny/paths-filter@v2.11.1
+        id: filter
+        with:
+          list-files: shell
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            frontend:
+              - 'frontend/**/*.ts'
+              - 'frontend/**/*.tsx'
+              - 'frontend/**/*.json'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        if: ${{ steps.filter.outputs.frontend == 'true' }}
+        with:
+          node-version: 18
+          cache-dependency-path: '**/yarn.lock'
+          cache: 'yarn'
+
+      - name: Install dependencies - frontend
+        run: yarn --pure-lockfile
+        if: ${{ steps.filter.outputs.frontend == 'true' }}
+        working-directory: ./frontend
+
+      - name: Lint - frontend
+        run: yarn run lint
+        if: ${{ steps.filter.outputs.frontend == 'true' }}
+        working-directory: ./frontend
+
+      - name: Commit code changes if any
+        uses: EndBug/add-and-commit@v7
+        if: ${{ steps.filter.outputs.frontend == 'true' }}
+        with:
+          author_name: github-actions-gm
+          author_email: bot+github-actions-gm@users.noreply.github.com
+          message: 'Fix code style issues with eslint & prettier (frontend)'
+          push: '--set-upstream origin'
